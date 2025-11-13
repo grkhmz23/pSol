@@ -1,0 +1,29 @@
+[package]
+name = "psol"
+version = "0.1.0"
+description = "Privacy SOL - Confidential transactions for Solana"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/swarp-protocol/psol"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "psol"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"
+solana-program = "=1.18.22"
+spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = "2.3.0", features = ["no-entrypoint"] }
+
+[dev-dependencies]
+solana-program-test = "=1.18.22"
+solana-sdk = "=1.18.22"
