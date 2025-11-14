@@ -1,5 +1,5 @@
 [toolchain]
-anchor_version = "0.30.1"
+anchor_version = "0.28.0"
 solana_version = "1.18.22"
 
 [features]
@@ -8,13 +8,13 @@ skip-lint = false
 seeds = true
 
 [programs.localnet]
-psol = "PSoL1111111111111111111111111111111111111111"
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
 
 [programs.devnet]
-psol = "PSoL1111111111111111111111111111111111111111"
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
 
 [programs.mainnet]
-psol = "PSoL1111111111111111111111111111111111111111"
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
 
 [registry]
 url = "https://api.apr.dev"
