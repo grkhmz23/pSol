@@ -448,7 +448,7 @@ The cryptographic implementations in the current version are simplified for MVP 
 
 - **Repository**: https://github.com/grkhmz23/pSol
 - **Telegram**: [@unc_gorkh](https://t.me/unc_gorkh)
-- **Website**: Coming Soon
+- **Website**:  https://psolprotocol.org/
 - **Twitter/X**: Coming Soon
 - **Issues**: https://github.com/grkhmz23/pSol/issues
 - **Explorer**: https://explorer.solana.com/address/2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv?cluster=devnet
