@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("11111111111111111111111111111111"); // Will update after deployment
+declare_id!("CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"); // ✅ FIXED!
 
 pub mod state;
 pub mod instructions;
