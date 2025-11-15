@@ -1,10 +1,10 @@
 [package]
 name = "psol"
 version = "0.1.0"
-description = "Privacy SOL - Confidential transactions for Solana"
+description = "pSOL Privacy Protocol - Confidential transactions for Solana"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/swarp-protocol/psol"
+repository = "https://github.com/grkhmz23/pSol"
 
 [lib]
 crate-type = ["cdylib", "lib"]
