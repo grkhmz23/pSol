@@ -9,18 +9,21 @@ seeds = true
 
 [programs.localnet]
 psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
 
 [programs.devnet]
 psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
 
 [programs.mainnet]
 psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
