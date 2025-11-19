@@ -2,7 +2,7 @@
 
 Complete privacy infrastructure with dual-layer architecture: consumer privacy token + developer privacy protocol.
 
-## 🎯 Products
+## Products
 
 ### pSOL Token (Consumer)
 - Program ID: `CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy`
@@ -16,7 +16,7 @@ Complete privacy infrastructure with dual-layer architecture: consumer privacy t
 - ZK proofs
 - Privacy SDK
 
-## 🚀 Deployment
+##  Deployment
 
 Both programs deployed on Solana **Devnet**.
 
@@ -24,7 +24,7 @@ Both programs deployed on Solana **Devnet**.
 
 **Token Program:** https://solscan.io/account/CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy?cluster=devnet
 
-## 📦 Repository Structure
+##  Repository Structure
 
 # Privacy Protocol
 cd /workspaces/pSol
@@ -35,7 +35,7 @@ cat > README.md << 'EOF'
 
 Complete privacy infrastructure with dual-layer architecture: consumer privacy token + developer privacy protocol.
 
-## 🎯 Products
+##  Products
 
 ### pSOL Token (Consumer)
 - **Program ID:** `CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy`
@@ -49,14 +49,14 @@ Complete privacy infrastructure with dual-layer architecture: consumer privacy t
 - ZK proofs
 - Privacy SDK
 
-## 🚀 Deployment
+## Deployment
 
 Both programs deployed on Solana **Devnet**.
 
 - **Privacy Protocol:** https://solscan.io/account/2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv?cluster=devnet
 - **Token Program:** https://solscan.io/account/CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy?cluster=devnet
 
-## 📦 Repository Structure
+##  Repository Structure
 ```
 programs/
 ├── psol-token/        # pSOL Token Program
