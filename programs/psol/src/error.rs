@@ -2,51 +2,50 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Protocol is paused")]
-    ProtocolPaused,
-
-    #[msg("Invalid amount")]
+    #[msg("Amount must be greater than zero.")]
     InvalidAmount,
 
-    #[msg("Insufficient balance")]
-    InsufficientBalance,
-
-    #[msg("Invalid proof")]
-    InvalidProof,
-
-    #[msg("Nullifier already used")]
-    NullifierUsed,
-
-    #[msg("Invalid encryption key")]
-    InvalidEncryptionKey,
-
-    #[msg("Arithmetic overflow")]
-    ArithmeticOverflow,
-
-    #[msg("Unauthorized")]
+    #[msg("Unauthorized.")]
     Unauthorized,
 
-    #[msg("Invalid fee")]
-    InvalidFee,
+    #[msg("Fee basis points too high.")]
+    FeeTooHigh,
 
-    #[msg("Privacy account already exists")]
-    PrivacyAccountAlreadyExists,
+    #[msg("Vault PDA mismatch.")]
+    InvalidVault,
 
-    #[msg("Privacy account not initialized")]
-    PrivacyAccountNotInitialized,
+    #[msg("Registry PDA mismatch.")]
+    InvalidRegistry,
 
-    #[msg("Invalid owner")]
-    InvalidOwner,
+    #[msg("Commitment registry full.")]
+    CommitmentRegistryFull,
 
-    #[msg("Underflow detected")]
-    UnderflowError,
+    #[msg("Nullifier already used.")]
+    NullifierAlreadyUsed,
 
-    #[msg("Input exceeds allowed length")]
-    OverLength,
+    #[msg("Pool is paused.")]
+    PoolPaused,
 
-    #[msg("Invalid commitment")]
-    InvalidCommitment,
+    // Some files may use this older name — keep both to avoid edits elsewhere.
+    #[msg("Protocol is paused.")]
+    ProtocolPaused,
 
-    #[msg("Invalid nullifier")]
-    InvalidNullifier,
+    #[msg("Insufficient balance.")]
+    InsufficientBalance,
+
+    // Keep both names because different files reference different ones.
+    #[msg("Arithmetic overflow.")]
+    MathOverflow,
+
+    #[msg("Arithmetic overflow.")]
+    ArithmeticOverflow,
+
+    #[msg("Amount too small.")]
+    AmountTooSmall,
+
+    #[msg("Invalid proof.")]
+    InvalidProof,
+
+    #[msg("Reentrancy detected.")]
+    ReentrancyDetected,
 }

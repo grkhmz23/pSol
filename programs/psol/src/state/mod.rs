@@ -1,9 +1,17 @@
-pub mod commitment_registry;
-pub mod nullifier_registry;
-pub mod pool;
-pub mod privacy_account;
+pub mod initialize_pool;
+pub mod init_privacy_account;
+pub mod deposit_private;
+pub mod withdraw_private;
+pub mod transfer_private;
+pub mod admin_pause;
+pub mod admin_unpause;
+pub mod admin_set_fees;
 
-pub use commitment_registry::CommitmentRegistry;
-pub use nullifier_registry::NullifierRegistry;
-pub use pool::PrivacyPool;
-pub use privacy_account::PrivacyAccount;
+pub use initialize_pool::*;
+pub use init_privacy_account::*;
+pub use deposit_private::*;
+pub use withdraw_private::*;
+pub use transfer_private::*;
+pub use admin_pause::*;
+pub use admin_unpause::*;
+pub use admin_set_fees::*;

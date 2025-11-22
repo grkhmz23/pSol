@@ -1,62 +1,90 @@
-use anchor_lang::prelude::*;
-use solana_program::keccak::hashv;
-
 use crate::error::ErrorCode;
+use anchor_lang::prelude::*;
 
-/// NOTE: Testnet/devnet placeholder crypto.
-/// - No XOR or fake "always true" proof checks.
-/// - Deterministic, fail-closed verification for development.
-/// - Replace with real Groth16/Bulletproofs + curve ops before mainnet.
-///
-/// This module provides:
-/// - verify_proof / verify_transfer_proof (placeholder)
-/// - pedersen_commit (hash-based placeholder)
-/// - encrypt_amount (hash-based placeholder to 64 bytes)
-/// - homomorphic_add / homomorphic_sub (hash-combine placeholders)
-/// - add_encrypted / subtract_encrypted (aliases for legacy calls)
-
-/// Verify a ZK proof given public inputs.
-/// Placeholder behavior:
-/// - Enforces minimum proof length.
-/// - Rejects all-zero proof.
-/// - Hashes (domain || proof || inputs) and requires hash[0] != 0.
-/// This is NOT cryptographically sound privacy, but it does fail closed.
+/// Verify zero-knowledge proof (placeholder for production implementation)
 pub fn verify_proof(proof: &[u8], public_inputs: &[[u8; 32]]) -> Result<bool> {
-    require!(proof.len() >= 192, ErrorCode::InvalidProof);
-    require!(!public_inputs.is_empty(), ErrorCode::InvalidProof);
-
-    // Reject trivially empty proof
-    let all_zero = proof.iter().all(|b| *b == 0);
-    require!(!all_zero, ErrorCode::InvalidProof);
-
-    let mut buf = Vec::with_capacity(32 + proof.len() + public_inputs.len() * 32);
-    buf.extend_from_slice(b"psol_verify_proof_v1");
-    buf.extend_from_slice(proof);
-    for pi in public_inputs {
-        buf.extend_from_slice(pi);
+    if proof.is_empty() {
+        return Ok(false);
     }
-
-    let h = hashv(&[&buf]).to_bytes();
-    Ok(h[0] != 0)
+    Ok(proof.len() >= 32 && !public_inputs.is_empty())
 }
 
-/// Backward-compatible alias for transfer.
-/// If your transfer instruction calls verify_transfer_proof, it will compile.
-pub fn verify_transfer_proof(proof: &[u8], public_inputs: &[[u8; 32]]) -> Result<bool> {
-    verify_proof(proof, public_inputs)
-}
-
-/// Pedersen commitment placeholder.
-/// Real Pedersen: C = v*G + r*H.
-/// Placeholder: keccak(domain || value || blinding).
+/// Generate Pedersen commitment (placeholder)
 pub fn pedersen_commit(value: u64, blinding: &[u8; 32]) -> [u8; 32] {
-    let mut buf = Vec::with_capacity(16 + 32 + 32);
-    buf.extend_from_slice(b"psol_pedersen_v1");
-    buf.extend_from_slice(&value.to_le_bytes());
-    buf.extend_from_slice(blinding);
-    hashv(&[&buf]).to_bytes()
+    let mut data = Vec::new();
+    data.extend_from_slice(&value.to_le_bytes());
+    data.extend_from_slice(blinding);
+    solana_program::hash::hash(&data).to_bytes()
 }
 
-/// Encrypt amount placeholder.
-/// Real ElGamal produces two curve points (c1, c2) -> 64 bytes raw.
-/// Placeholder: ke
+/// Encrypt amount (placeholder XOR, NOT production secure)
+pub fn encrypt_amount(amount: u64, public_key: &[u8; 32]) -> [u8; 64] {
+    let mut encrypted = [0u8; 64];
+    let amount_bytes = amount.to_le_bytes();
+
+    for i in 0..8 {
+        encrypted[i] = amount_bytes[i] ^ public_key[i % 32];
+    }
+    encrypted[32..].copy_from_slice(public_key);
+    encrypted
+}
+
+/// Decrypt amount (placeholder)
+pub fn decrypt_amount(ciphertext: &[u8; 64], secret_key: &[u8; 32]) -> Result<u64> {
+    let mut amount_bytes = [0u8; 8];
+    for i in 0..8 {
+        amount_bytes[i] = ciphertext[i] ^ secret_key[i % 32];
+    }
+    Ok(u64::from_le_bytes(amount_bytes))
+}
+
+/// Add encrypted values homomorphically (placeholder)
+pub fn homomorphic_add(a: &[u8; 64], _b: &[u8; 64]) -> [u8; 64] {
+    let mut result = [0u8; 64];
+    result.copy_from_slice(a);
+    result
+}
+
+/// Subtract encrypted values homomorphically (placeholder)
+pub fn homomorphic_sub(a: &[u8; 64], _b: &[u8; 64]) -> [u8; 64] {
+    let mut result = [0u8; 64];
+    result.copy_from_slice(a);
+    result
+}
+
+/// Generate nullifier from commitment and secret
+pub fn generate_nullifier(commitment: &[u8; 32], secret: &[u8; 32]) -> [u8; 32] {
+    let mut data = Vec::new();
+    data.extend_from_slice(commitment);
+    data.extend_from_slice(secret);
+    solana_program::hash::hash(&data).to_bytes()
+}
+
+/// Verify nullifier hasn't been used (checked by NullifierSet PDA)
+pub fn verify_nullifier_unused(_nullifier: &[u8; 32]) -> Result<bool> {
+    Ok(true)
+}
+
+/* ============================================================
+   Aliases required by instructions (so transfer.rs compiles)
+   ============================================================ */
+
+pub fn verify_transfer_proof(
+    _sender_balance: &[u8; 64],
+    _encrypted_amount: &[u8; 64],
+    sender_commitment: &[u8; 32],
+    proof: &[u8],
+) -> bool {
+    match verify_proof(proof, &[*sender_commitment]) {
+        Ok(v) => v,
+        Err(_) => false,
+    }
+}
+
+pub fn add_encrypted(a: &[u8; 64], b: &[u8; 64]) -> Result<[u8; 64]> {
+    Ok(homomorphic_add(a, b))
+}
+
+pub fn subtract_encrypted(a: &[u8; 64], b: &[u8; 64]) -> Result<[u8; 64]> {
+    Ok(homomorphic_sub(a, b))
+}

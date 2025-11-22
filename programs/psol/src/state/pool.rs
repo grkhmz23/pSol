@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use crate::error::ErrorCode;
 
 #[account]
 pub struct PrivacyPool {
@@ -9,24 +10,38 @@ pub struct PrivacyPool {
     pub paused: bool,
     pub fee_bps: u16,
     pub total_locked: u64,
+    pub bump: u8,
 }
 
 impl PrivacyPool {
-    pub const SPACE: usize = 32 + 1 + 1 + 1 + 1 + 2 + 8;
+    pub const SIZE: usize = 8  // discriminator
+        + 32                   // admin
+        + 1                    // vault_bump
+        + 1                    // commitment_bump
+        + 1                    // nullifier_bump
+        + 1                    // paused
+        + 2                    // fee_bps
+        + 8                    // total_locked
+        + 1;                   // bump
 
     pub fn check_not_paused(&self) -> Result<()> {
-        require!(!self.paused, crate::error::ErrorCode::PoolPaused);
+        require!(!self.paused, ErrorCode::PoolPaused);
         Ok(())
     }
 
-    pub fn apply_fee(&self, amount: u64) -> Result<(u64, u64)> {
-        let fee = amount
-            .checked_mul(self.fee_bps as u64)
-            .and_then(|v| v.checked_div(10_000))
-            .ok_or(crate::error::ErrorCode::MathOverflow)?;
-        let net = amount
-            .checked_sub(fee)
-            .ok_or(crate::error::ErrorCode::AmountTooSmall)?;
-        Ok((net, fee))
+    pub fn lock(&mut self, amount: u64) -> Result<()> {
+        self.total_locked = self
+            .total_locked
+            .checked_add(amount)
+            .ok_or(ErrorCode::MathOverflow)?;
+        Ok(())
+    }
+
+    pub fn unlock(&mut self, amount: u64) -> Result<()> {
+        self.total_locked = self
+            .total_locked
+            .checked_sub(amount)
+            .ok_or(ErrorCode::AmountTooSmall)?;
+        Ok(())
     }
 }

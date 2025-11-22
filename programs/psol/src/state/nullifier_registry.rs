@@ -1,31 +1,35 @@
 use anchor_lang::prelude::*;
-
 use crate::error::ErrorCode;
-
-pub const MAX_NULLIFIERS: usize = 128;
 
 #[account]
 pub struct NullifierRegistry {
     pub pool: Pubkey,
     pub count: u64,
-    pub nullifiers: [[u8; 32]; MAX_NULLIFIERS],
+    pub nullifiers: [[u8; 32]; 1024],
 }
 
 impl NullifierRegistry {
-    pub const SPACE: usize = 8 + 32 + 8 + (MAX_NULLIFIERS * 32);
+    pub const MAX: usize = 1024;
+    pub const SIZE: usize = 8  // discriminator
+        + 32                   // pool
+        + 8                    // count
+        + (32 * Self::MAX);    // nullifiers
 
     pub fn register(&mut self, pool: &Pubkey, nullifier: [u8; 32]) -> Result<()> {
         require_keys_eq!(self.pool, *pool, ErrorCode::InvalidRegistry);
-        if self.count as usize >= MAX_NULLIFIERS {
-            return err!(ErrorCode::CommitmentRegistryFull);
-        }
-        for existing in &self.nullifiers[..self.count as usize] {
-            if existing == &nullifier {
+
+        for i in 0..(self.count as usize) {
+            if self.nullifiers[i] == nullifier {
                 return err!(ErrorCode::NullifierAlreadyUsed);
             }
         }
+
+        if (self.count as usize) >= Self::MAX {
+            return err!(ErrorCode::CommitmentRegistryFull);
+        }
+
         self.nullifiers[self.count as usize] = nullifier;
-        self.count += 1;
+        self.count = self.count.checked_add(1).ok_or(ErrorCode::MathOverflow)?;
         Ok(())
     }
 }

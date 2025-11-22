@@ -1,48 +1,71 @@
 use anchor_lang::prelude::*;
-
 use crate::crypto;
-use crate::state::{CommitmentRegistry, NullifierRegistry, PrivacyAccount, PrivacyPool};
+use crate::state::{PrivacyAccount, PrivacyPool};
+use crate::error::ErrorCode;
 
 #[derive(Accounts)]
 pub struct TransferPrivate<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"privacy_pool"],
+        bump = pool.bump
+    )]
     pub pool: Account<'info, PrivacyPool>,
+
     #[account(
         mut,
-        seeds = [b"commitment", pool.key().as_ref()],
-        bump = pool.commitment_bump
+        seeds = [b"privacy_account", sender.key().as_ref()],
+        bump = sender_account.bump,
+        constraint = sender_account.owner == sender.key() @ ErrorCode::Unauthorized
     )]
-    pub commitment_registry: Account<'info, CommitmentRegistry>,
+    pub sender_account: Account<'info, PrivacyAccount>,
+
     #[account(
         mut,
-        seeds = [b"nullifier", pool.key().as_ref()],
-        bump = pool.nullifier_bump
+        seeds = [b"privacy_account", recipient.key().as_ref()],
+        bump = recipient_account.bump
     )]
-    pub nullifier_registry: Account<'info, NullifierRegistry>,
-    #[account(mut, has_one = owner)]
-    pub from_account: Account<'info, PrivacyAccount>,
-    pub owner: Signer<'info>,
+    pub recipient_account: Account<'info, PrivacyAccount>,
+
     #[account(mut)]
-    pub to_account: Account<'info, PrivacyAccount>,
+    pub sender: Signer<'info>,
+
+    /// CHECK: recipient may be any user
+    pub recipient: AccountInfo<'info>,
 }
 
-pub fn transfer_private(
+pub fn handler(
     ctx: Context<TransferPrivate>,
-    amount: u64,
-    nullifier: [u8; 32],
-    nonce: u64,
+    encrypted_amount: [u8; 64],
+    proof: Vec<u8>,
 ) -> Result<()> {
     ctx.accounts.pool.check_not_paused()?;
-    ctx.accounts
-        .nullifier_registry
-        .register(&ctx.accounts.pool.key(), nullifier)?;
 
-    ctx.accounts.from_account.withdraw(amount)?;
-    ctx.accounts.to_account.deposit(amount)?;
+    let sender_account = &mut ctx.accounts.sender_account;
+    let recipient_account = &mut ctx.accounts.recipient_account;
 
-    let commitment = crypto::commitment(&ctx.accounts.to_account.owner, amount, nonce);
-    ctx.accounts
-        .commitment_registry
-        .add_commitment(&ctx.accounts.pool.key(), commitment)?;
+    require!(
+        crypto::verify_transfer_proof(
+            &sender_account.encrypted_balance,
+            &encrypted_amount,
+            &sender_account.commitment,
+            &proof,
+        ),
+        ErrorCode::InvalidProof
+    );
+
+    sender_account.encrypted_balance =
+        crypto::subtract_encrypted(&sender_account.encrypted_balance, &encrypted_amount)?;
+
+    recipient_account.encrypted_balance =
+        crypto::add_encrypted(&recipient_account.encrypted_balance, &encrypted_amount)?;
+
+    sender_account.nonce = sender_account.nonce.checked_add(1).ok_or(ErrorCode::MathOverflow)?;
+    recipient_account.nonce = recipient_account.nonce.checked_add(1).ok_or(ErrorCode::MathOverflow)?;
+
+    sender_account.last_update = Clock::get()?.slot;
+    recipient_account.last_update = Clock::get()?.slot;
+
+    msg!("Private transfer completed");
     Ok(())
 }

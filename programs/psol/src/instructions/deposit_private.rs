@@ -1,62 +1,65 @@
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::system_instruction;
-
 use crate::crypto;
 use crate::error::ErrorCode;
-use crate::state::{CommitmentRegistry, PrivacyAccount, PrivacyPool};
+use crate::state::*;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-pub struct DepositPrivate<'info> {
-    #[account(mut)]
+pub struct TransferPrivate<'info> {
+    #[account(
+        seeds = [b"privacy_pool"],
+        bump = pool.bump
+    )]
     pub pool: Account<'info, PrivacyPool>,
-    /// CHECK: vault PDA
-    #[account(mut, seeds = [b"vault", pool.key().as_ref()], bump = pool.vault_bump)]
-    pub vault: UncheckedAccount<'info>,
+
     #[account(
         mut,
-        seeds = [b"commitment", pool.key().as_ref()],
-        bump = pool.commitment_bump
+        seeds = [b"privacy_account", sender.key().as_ref()],
+        bump = sender_account.bump,
+        constraint = sender_account.owner == sender.key() @ ErrorCode::Unauthorized
     )]
-    pub commitment_registry: Account<'info, CommitmentRegistry>,
+    pub sender_account: Account<'info, PrivacyAccount>,
+
     #[account(
         mut,
-        seeds = [b"privacy", user.key().as_ref()],
-        bump
+        seeds = [b"privacy_account", recipient.key().as_ref()],
+        bump = recipient_account.bump
     )]
-    pub privacy_account: Account<'info, PrivacyAccount>,
+    pub recipient_account: Account<'info, PrivacyAccount>,
+
     #[account(mut)]
-    pub user: Signer<'info>,
-    pub system_program: Program<'info, System>,
+    pub sender: Signer<'info>,
+
+    /// CHECK: Recipient can be any account
+    pub recipient: AccountInfo<'info>,
 }
 
-pub fn deposit_private(ctx: Context<DepositPrivate>, amount: u64, nonce: u64) -> Result<()> {
-    let pool = &mut ctx.accounts.pool;
-    pool.check_not_paused()?;
+pub fn handler(
+    ctx: Context<TransferPrivate>,
+    encrypted_amount: [u8; 64],
+    proof: Vec<u8>,
+) -> Result<()> {
+    let sender_account = &mut ctx.accounts.sender_account;
+    let recipient_account = &mut ctx.accounts.recipient_account;
 
-    let (net_amount, _) = pool.apply_fee(amount)?;
+    require!(
+        crypto::verify_transfer_proof(
+            &sender_account.encrypted_balance,
+            &encrypted_amount,
+            &sender_account.commitment,
+            &proof,
+        ),
+        ErrorCode::InvalidProof
+    );
 
-    let transfer_ix =
-        system_instruction::transfer(&ctx.accounts.user.key(), &ctx.accounts.vault.key(), amount);
-    anchor_lang::solana_program::program::invoke(
-        &transfer_ix,
-        &[
-            ctx.accounts.user.to_account_info(),
-            ctx.accounts.vault.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-        ],
-    )?;
+    sender_account.encrypted_balance =
+        crypto::subtract_encrypted(&sender_account.encrypted_balance, &encrypted_amount)?;
 
-    pool.total_locked = pool
-        .total_locked
-        .checked_add(net_amount)
-        .ok_or(ErrorCode::MathOverflow)?;
+    recipient_account.encrypted_balance =
+        crypto::add_encrypted(&recipient_account.encrypted_balance, &encrypted_amount)?;
 
-    ctx.accounts.privacy_account.deposit(net_amount)?;
+    sender_account.last_update = Clock::get()?.slot;
+    recipient_account.last_update = Clock::get()?.slot;
 
-    let commitment = crypto::commitment(&ctx.accounts.user.key(), net_amount, nonce);
-    ctx.accounts
-        .commitment_registry
-        .add_commitment(&pool.key(), commitment)?;
-
+    msg!("Private transfer completed");
     Ok(())
 }

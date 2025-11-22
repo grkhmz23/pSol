@@ -5,56 +5,63 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 
+pub use instructions::*;
+pub use state::*;
 pub use error::ErrorCode;
 
+// keep your current program id here
 declare_id!("2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv");
 
 #[program]
 pub mod psol {
     use super::*;
 
-    pub fn initialize_pool(ctx: Context<instructions::InitializePool>, fee_bps: u16) -> Result<()> {
-        instructions::initialize_pool(ctx, fee_bps)
+    pub fn initialize_pool(ctx: Context<InitializePool>, fee_bps: u16) -> Result<()> {
+        instructions::initialize_pool::handler(ctx, fee_bps)
     }
 
-    pub fn init_privacy_account(ctx: Context<instructions::InitPrivacyAccount>) -> Result<()> {
-        instructions::init_privacy_account(ctx)
+    pub fn init_privacy_account(
+        ctx: Context<InitPrivacyAccount>,
+        encryption_key: [u8; 32],
+    ) -> Result<()> {
+        instructions::init_privacy_account::handler(ctx, encryption_key)
     }
 
     pub fn deposit_private(
-        ctx: Context<instructions::DepositPrivate>,
+        ctx: Context<DepositPrivate>,
         amount: u64,
-        nonce: u64,
+        encrypted_amount: [u8; 64],
+        proof: Vec<u8>,
     ) -> Result<()> {
-        instructions::deposit_private(ctx, amount, nonce)
-    }
-
-    pub fn transfer_private(
-        ctx: Context<instructions::TransferPrivate>,
-        amount: u64,
-        nullifier: [u8; 32],
-        nonce: u64,
-    ) -> Result<()> {
-        instructions::transfer_private(ctx, amount, nullifier, nonce)
+        instructions::deposit_private::handler(ctx, amount, encrypted_amount, proof)
     }
 
     pub fn withdraw_private(
-        ctx: Context<instructions::WithdrawPrivate>,
+        ctx: Context<WithdrawPrivate>,
         amount: u64,
         nullifier: [u8; 32],
+        proof: Vec<u8>,
     ) -> Result<()> {
-        instructions::withdraw_private(ctx, amount, nullifier)
+        instructions::withdraw_private::handler(ctx, amount, nullifier, proof)
     }
 
-    pub fn admin_set_fees(ctx: Context<instructions::AdminSetFees>, fee_bps: u16) -> Result<()> {
-        instructions::admin_set_fees(ctx, fee_bps)
+    pub fn transfer_private(
+        ctx: Context<TransferPrivate>,
+        encrypted_amount: [u8; 64],
+        proof: Vec<u8>,
+    ) -> Result<()> {
+        instructions::transfer_private::handler(ctx, encrypted_amount, proof)
     }
 
-    pub fn admin_pause(ctx: Context<instructions::AdminPause>) -> Result<()> {
-        instructions::admin_pause(ctx)
+    pub fn admin_pause(ctx: Context<AdminPause>) -> Result<()> {
+        instructions::admin_pause::handler(ctx)
     }
 
-    pub fn admin_unpause(ctx: Context<instructions::AdminUnpause>) -> Result<()> {
-        instructions::admin_unpause(ctx)
+    pub fn admin_unpause(ctx: Context<AdminUnpause>) -> Result<()> {
+        instructions::admin_unpause::handler(ctx)
+    }
+
+    pub fn admin_set_fees(ctx: Context<AdminSetFees>, fee_bps: u16) -> Result<()> {
+        instructions::admin_set_fees::handler(ctx, fee_bps)
     }
 }
