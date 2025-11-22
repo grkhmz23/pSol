@@ -1,0 +1,21 @@
+[programs.localnet]
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
+
+[programs.devnet]
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
+
+[programs.mainnet]
+psol = "2dJdyxoGmAoJLsZh7h8ma8xeyoaj7uiHFgrsgUAQMojv"
+psol_token = "CgERkyXGARsLFqgBHyTk4Njyt7nyq9foJfmV7ptadYLy"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[registry]
+url = "https://api.apr.dev"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

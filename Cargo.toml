@@ -1,0 +1,9 @@
+
+-0
+
+[workspace]
+members = [
+  "programs/psol",
+  "programs/psol-token",
+]
+resolver = "2"

@@ -1,0 +1,41 @@
+
+# Security - Critical for investor repos
+*-keypair.json
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!idl/*.json
+.env
+.env.local
+.env.*.local
+
+# Solana keypairs
+id.json
+devnet.json
+mainnet.json
+wallet.json
+
+# Build artifacts
+target/
+node_modules/
+dist/
+build/
+.next/
+.anchor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Helper scripts (local only)
+.scripts/
+*.json
+package*.json
+yarn.lock

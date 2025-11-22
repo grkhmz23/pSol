@@ -1,0 +1,22 @@
+[package]
+name = "psol"
+version = "0.1.0"
+description = "pSOL Privacy Protocol - Confidential transactions for Solana"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/grkhmz23/pSol"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "psol"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "0.32.1"
+anchor-spl = "0.32.1"
