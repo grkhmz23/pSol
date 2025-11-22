@@ -19,3 +19,5 @@ url = "https://api.apr.dev"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+[toolchain]
+anchor_version = "0.32.1"
