@@ -1,0 +1,21 @@
+[package]
+name = "psol-token"
+version = "0.1.0"
+description = "pSol token program"
+edition = "2021"
+
+[lib]
+name = "psol_token"
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.32.1"
+anchor-spl = "0.32.1"
+solana-program = "1.18.26"

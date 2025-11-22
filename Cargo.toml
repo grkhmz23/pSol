@@ -1,9 +1,10 @@
-
--0
-
 [workspace]
 members = [
   "programs/psol",
   "programs/psol-token",
 ]
+
 resolver = "2"
+
+[profile.release]
+overflow-checks = true
